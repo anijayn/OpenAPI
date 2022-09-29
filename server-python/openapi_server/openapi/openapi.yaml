@@ -1,0 +1,178 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: apiteam@swagger.io
+    name: Swagger API Team
+    url: http://swagger.io
+  description: A sample API that uses a petstore as an example to demonstrate features
+    in the OpenAPI 3.0 specification
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Petstore
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+paths:
+  /pets:
+    get:
+      description: Returns all pets from the system that the user has access to
+      operationId: find_pets
+      parameters:
+      - description: tags to filter by
+        explode: true
+        in: query
+        name: tags
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: maximum number of results to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Pet'
+                type: array
+          description: Successful pet response
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+    post:
+      description: Creates a new pet in the store. Duplicates are allowed
+      operationId: add_pet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPet'
+        description: Pet to add to the store
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+          description: pet response
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /pets/{id}:
+    delete:
+      description: deletes a single pet based on the ID supplied
+      operationId: delete_pet
+      parameters:
+      - description: ID of pet to delete
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "204":
+          description: pet deleted
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+    get:
+      description: Returns a pet based on its ID
+      operationId: find_pet_by_id
+      parameters:
+      - description: ID of pet to fetch
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+          description: pet response
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+components:
+  schemas:
+    Pet:
+      allOf:
+      - $ref: '#/components/schemas/NewPet'
+      - $ref: '#/components/schemas/Pet_allOf'
+      title: Pet
+    NewPet:
+      example:
+        name: name
+        tag: tag
+      properties:
+        name:
+          title: name
+          type: string
+        tag:
+          title: tag
+          type: string
+      required:
+      - name
+      title: NewPet
+      type: object
+    Error:
+      properties:
+        code:
+          format: int32
+          title: code
+          type: integer
+        message:
+          title: message
+          type: string
+      required:
+      - code
+      - message
+      title: Error
+      type: object
+    Pet_allOf:
+      properties:
+        id:
+          format: int64
+          title: id
+          type: integer
+      required:
+      - id
+      title: Pet_allOf
+      type: object
